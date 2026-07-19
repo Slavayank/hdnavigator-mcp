@@ -32,6 +32,8 @@ codex plugin marketplace add <github-owner>/<github-repo>
 
 Then install `HDnavigator MCP` from the Codex plugin list and provide their HDnavigator token when prompted, or set `HDNAVIGATOR_MCP_TOKEN` in their Codex environment.
 
+Set `HDNAVIGATOR_MCP_TOKEN` before starting a new Codex task. The remote MCP server requires the Bearer token during MCP discovery, so adding the token later inside chat will not expose the tools in that already-running task.
+
 For local testing before publication:
 
 ```bash

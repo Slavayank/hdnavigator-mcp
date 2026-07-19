@@ -26,7 +26,7 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
         config = self.load_json(PLUGIN / ".mcp.json")
         server = config["mcpServers"]["hdnavigator"]
 
-        self.assertEqual(server["type"], "http")
+        self.assertEqual(set(server), {"url", "bearer_token_env_var"})
         self.assertEqual(server["url"], "https://mcp.slavayank.com/mcp")
         self.assertEqual(server["bearer_token_env_var"], "HDNAVIGATOR_MCP_TOKEN")
 
