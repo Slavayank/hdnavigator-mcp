@@ -32,6 +32,13 @@ codex plugin marketplace add <github-owner>/<github-repo>
 
 Then install `HDnavigator MCP` from the Codex plugin list and provide their HDnavigator token when prompted, or set `HDNAVIGATOR_MCP_TOKEN` in their Codex environment.
 
+For local testing before publication:
+
+```bash
+codex plugin marketplace add .
+codex plugin add hdnavigator-mcp@hdnavigator
+```
+
 ## Starter Prompts
 
 - Create my Human Design chart.

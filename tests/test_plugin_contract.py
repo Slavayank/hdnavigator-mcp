@@ -52,6 +52,8 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
         marketplace = self.load_json(ROOT / ".agents" / "plugins" / "marketplace.json")
         [entry] = marketplace["plugins"]
 
+        self.assertEqual(marketplace["name"], "hdnavigator")
+        self.assertEqual(marketplace["interface"]["displayName"], "HDnavigator")
         self.assertEqual(entry["name"], "hdnavigator-mcp")
         self.assertEqual(entry["source"]["path"], "./plugins/hdnavigator-mcp")
         self.assertEqual(entry["policy"]["installation"], "AVAILABLE")
