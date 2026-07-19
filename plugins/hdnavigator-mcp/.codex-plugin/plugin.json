@@ -1,0 +1,37 @@
+{
+  "name": "hdnavigator-mcp",
+  "version": "0.1.0",
+  "description": "Create, view, and explain Human Design charts with HDnavigator.",
+  "author": {
+    "name": "HDnavigator",
+    "url": "https://hdnavigator.ru"
+  },
+  "homepage": "https://hdnavigator.ru",
+  "keywords": [
+    "human-design",
+    "bodygraph",
+    "hdnavigator",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "HDnavigator MCP",
+    "shortDescription": "Create and discuss Human Design charts.",
+    "longDescription": "Create, view, and explain Human Design charts using exact birth data. HDnavigator securely connects Codex to the user's saved charts, returns the bodygraph image and detailed chart parameters, and provides authoritative descriptions that Codex can translate and explain in the user's language.",
+    "developerName": "HDnavigator",
+    "category": "Productivity",
+    "websiteURL": "https://hdnavigator.ru",
+    "capabilities": [
+      "MCP"
+    ],
+    "defaultPrompt": [
+      "Create my Human Design chart.",
+      "Show my saved HDnavigator charts.",
+      "Explain this Human Design bodygraph."
+    ],
+    "brandColor": "#111827",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg"
+  }
+}
