@@ -22,13 +22,12 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
         self.assertEqual(manifest["interface"]["logo"], "./assets/logo.svg")
         self.assertEqual(manifest["interface"]["composerIcon"], "./assets/logo.svg")
 
-    def test_mcp_configuration_uses_public_server_and_env_token(self):
+    def test_mcp_configuration_uses_public_server_without_discovery_auth(self):
         config = self.load_json(PLUGIN / ".mcp.json")
         server = config["mcpServers"]["hdnavigator"]
 
-        self.assertEqual(set(server), {"url", "bearer_token_env_var"})
+        self.assertEqual(set(server), {"url"})
         self.assertEqual(server["url"], "https://mcp.slavayank.com/mcp")
-        self.assertEqual(server["bearer_token_env_var"], "HDNAVIGATOR_MCP_TOKEN")
 
     def test_skill_instructions_cover_required_workflows(self):
         skill = (PLUGIN / "skills" / "hdnavigator-chart-guide" / "SKILL.md").read_text(
@@ -39,6 +38,10 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
             "get_new_chart",
             "list_saved_charts",
             "get_saved_chart",
+            "hdn_",
+            "token",
+            "chat",
+            "HDNAVIGATOR_MCP_TOKEN",
             "image_url",
             "![Human Design bodygraph]",
             "limit",
@@ -47,6 +50,16 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
             "translate",
         ]:
             self.assertIn(expected, skill)
+
+        self.assertIn("Do not repeat the token", skill)
+
+    def test_readme_explains_easy_token_setup(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("hdn_", readme)
+        self.assertIn("send it in chat", readme)
+        self.assertIn("HDNAVIGATOR_MCP_TOKEN", readme)
+        self.assertIn("https://hdnavigator.ru", readme)
 
     def test_marketplace_entry_is_installable_on_install(self):
         marketplace = self.load_json(ROOT / ".agents" / "plugins" / "marketplace.json")

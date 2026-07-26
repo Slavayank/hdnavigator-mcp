@@ -14,13 +14,14 @@ Each chart response can include a bodygraph `image_url`, a permanent `page_url`,
 
 ## Authentication
 
-Users can get an HDnavigator token at https://hdnavigator.ru after registration and email confirmation.
+Users can get an HDnavigator token at https://hdnavigator.ru after registration and email confirmation. Tokens should start with `hdn_`.
 
-The plugin expects Bearer authentication through:
+There are two ways to use the token:
 
-`HDNAVIGATOR_MCP_TOKEN`
+- Save it as `HDNAVIGATOR_MCP_TOKEN` before starting Codex.
+- Or send it in chat when Codex asks for the HDnavigator token.
 
-Do not commit real tokens to this repository.
+Codex will pass the token to MCP tool calls as the `token` argument. Do not commit real tokens to this repository.
 
 ## Install From GitHub
 
@@ -30,9 +31,7 @@ After this repository is published, users can add its marketplace to Codex:
 codex plugin marketplace add <github-owner>/<github-repo>
 ```
 
-Then install `HDnavigator MCP` from the Codex plugin list and provide their HDnavigator token when prompted, or set `HDNAVIGATOR_MCP_TOKEN` in their Codex environment.
-
-Set `HDNAVIGATOR_MCP_TOKEN` before starting a new Codex task. The remote MCP server requires the Bearer token during MCP discovery, so adding the token later inside chat will not expose the tools in that already-running task.
+Then install `HDnavigator MCP` from the Codex plugin list. Codex should explain that the user needs an `hdn_...` token from https://hdnavigator.ru and can either save it in `HDNAVIGATOR_MCP_TOKEN` or send it in chat.
 
 For local testing before publication:
 
@@ -49,7 +48,7 @@ codex plugin add hdnavigator-mcp@hdnavigator
 
 ## Notes For Codex
 
-Ask for `year`, `month`, `day`, `hour`, `minute`, `city`, and `country` before creating a new chart. Send those fields using English JSON keys. HDnavigator resolves timezone upstream after token verification.
+Ask for the user's HDnavigator `hdn_...` token before calling tools if one is not already available. Do not repeat the token back to the user. Ask for `year`, `month`, `day`, `hour`, `minute`, `city`, and `country` before creating a new chart. Send those fields using English JSON keys along with the `token` field. HDnavigator resolves timezone upstream after token verification.
 
 When `image_url` is present, render it as:
 

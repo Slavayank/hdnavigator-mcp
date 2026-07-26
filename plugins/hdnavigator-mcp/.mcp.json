@@ -1,8 +1,7 @@
 {
   "mcpServers": {
     "hdnavigator": {
-      "url": "https://mcp.slavayank.com/mcp",
-      "bearer_token_env_var": "HDNAVIGATOR_MCP_TOKEN"
+      "url": "https://mcp.slavayank.com/mcp"
     }
   }
 }

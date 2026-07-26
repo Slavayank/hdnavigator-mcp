@@ -9,19 +9,27 @@ Use the HDnavigator MCP tools whenever the user asks for a Human Design chart, b
 
 ## Authentication
 
-The MCP server uses Bearer authentication. Users can get a token at https://hdnavigator.ru after registration and email confirmation. The plugin expects the token in `HDNAVIGATOR_MCP_TOKEN`.
+HDnavigator MCP can create a Human Design bodygraph and brief explanation for any complete birth date, but each tool call needs an HDnavigator token.
 
-Do not ask the user to paste the token into a chat message if the client can store it as plugin authentication or an environment variable.
+When the user has installed the plugin but has not provided a token yet, explain this setup flow:
+
+1. Go to https://hdnavigator.ru.
+2. Register and confirm the email address.
+3. Get an HDnavigator token that starts with `hdn_`.
+4. Either save it as `HDNAVIGATOR_MCP_TOKEN` before starting Codex or send the `hdn_...` token in chat.
+5. After that, Codex can create a bodygraph with a short description for any birth date.
+
+If the token is available in chat, pass it as the `token` argument to HDnavigator MCP tools. Do not repeat the token back to the user, do not include it in final answers, and do not store it in files. If the user pasted a token into chat, you may mention that they can rotate it later in their HDnavigator account for extra safety.
 
 ## Tools
 
-Use `get_new_chart` to create a new Human Design chart from ordered birth data. Ask for missing required fields before calling the tool: `year`, `month`, `day`, `hour`, `minute`, `city`, and `country`.
+Use `get_new_chart` to create a new Human Design chart from ordered birth data. Ask for a missing `token` first, then ask for missing birth fields before calling the tool: `year`, `month`, `day`, `hour`, `minute`, `city`, and `country`.
 
-Send birth data to `get_new_chart` in English field names. Preserve city and country exactly as the user provided them unless the user corrects the spelling. The upstream service resolves timezone after token verification.
+Send the token and birth data to `get_new_chart` in English field names. Preserve city and country exactly as the user provided them unless the user corrects the spelling. The upstream service resolves timezone after token verification.
 
-Use `list_saved_charts` when the user asks what charts are already saved. It is paginated with `limit` and `offset`. If the result has more records than shown, offer to continue with the next offset. The next offset is `offset + limit`.
+Use `list_saved_charts` when the user asks what charts are already saved. It requires `token` and is paginated with `limit` and `offset`. If the result has more records than shown, offer to continue with the next offset. The next offset is `offset + limit`.
 
-Use `get_saved_chart` when the user chooses or mentions a saved chart id. Pass only the numeric `chart_id`.
+Use `get_saved_chart` when the user chooses or mentions a saved chart id. Pass `token` and the numeric `chart_id`.
 
 ## Response Style
 
