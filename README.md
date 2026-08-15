@@ -1,5 +1,12 @@
 # HDnavigator MCP for Codex
 
+<p align="center">
+  <a href="#english"><img alt="In English" src="https://img.shields.io/badge/In%20English-111827?style=for-the-badge"></a>
+  <a href="#russian"><img alt="На русском" src="https://img.shields.io/badge/%D0%9D%D0%B0%20%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%BE%D0%BC-2563eb?style=for-the-badge"></a>
+</p>
+
+<a id="english"></a>
+
 HDnavigator MCP connects Codex to the HDnavigator Human Design service.
 
 With this plugin, Codex can:
@@ -162,6 +169,8 @@ If too many requests are sent, HDnavigator may return `429`. This means rate lim
 If `image_url` is present but the image is not rendered by the client, Codex should still show the direct image link.
 
 ---
+
+<a id="russian"></a>
 
 # HDnavigator MCP для Codex
 
