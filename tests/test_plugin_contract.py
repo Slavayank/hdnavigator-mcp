@@ -48,10 +48,12 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
             "offset",
             "402",
             "translate",
+            "setx",
+            "environment variable",
         ]:
             self.assertIn(expected, skill)
 
-        self.assertIn("Do not repeat the token", skill)
+        self.assertIn("Never repeat the token", skill)
 
     def test_readme_explains_easy_token_setup(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -60,6 +62,8 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
         self.assertIn("send it in chat", readme)
         self.assertIn("HDNAVIGATOR_MCP_TOKEN", readme)
         self.assertIn("https://hdnavigator.ru", readme)
+        self.assertIn("once", readme)
+        self.assertIn("setx", readme)
 
     def test_marketplace_entry_is_installable_on_install(self):
         marketplace = self.load_json(ROOT / ".agents" / "plugins" / "marketplace.json")

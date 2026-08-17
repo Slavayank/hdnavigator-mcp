@@ -11,15 +11,22 @@ Use the HDnavigator MCP tools whenever the user asks for a Human Design chart, b
 
 HDnavigator MCP can create a Human Design bodygraph and brief explanation for any complete birth date, but each tool call needs an HDnavigator token.
 
-When the user has installed the plugin but has not provided a token yet, explain this setup flow:
+Before asking the user for a token, check the environment variable `HDNAVIGATOR_MCP_TOKEN`. If it is set, read it and use it as the `token` argument for every tool call. Do not ask the user for a token again.
+
+When the user has installed the plugin but no token is saved yet, explain this setup flow:
 
 1. Go to https://hdnavigator.ru.
 2. Register and confirm the email address.
 3. Get an HDnavigator token that starts with `hdn_`.
-4. Either save it as `HDNAVIGATOR_MCP_TOKEN` before starting Codex or send the `hdn_...` token in chat.
-5. After that, Codex can create a bodygraph with a short description for any birth date.
+4. Ask the user to send the `hdn_...` token in chat. The first time a token arrives in chat, save it into the global environment variable `HDNAVIGATOR_MCP_TOKEN` so all future chats reuse it automatically:
+   - On Windows: `setx HDNAVIGATOR_MCP_TOKEN "hdn_..."` (saves to the user environment; new terminal and chat sessions read it).
+   - On macOS/Linux: append `export HDNAVIGATOR_MCP_TOKEN="hdn_..."` to `~/.zshrc` (or `~/.bashrc`/`~/.profile`).
+   - Confirm the variable was saved, but do not print the token value.
+5. After that, HDnavigator can create a bodygraph with a short description for any birth date.
 
-If the token is available in chat, pass it as the `token` argument to HDnavigator MCP tools. Do not repeat the token back to the user, do not include it in final answers, and do not store it in files. If the user pasted a token into chat, you may mention that they can rotate it later in their HDnavigator account for extra safety.
+A newly saved variable is only read by new sessions. If `setx` or the profile edit was just applied and the current session still does not see the variable, keep using the token the user sent in chat for this session.
+
+Never repeat the token back to the user, never include it in final answers, and never write it into project files, logs, or commits. The token lives only in the environment variable. If the user pasted a token into chat, you may mention that they can rotate it later in their HDnavigator account for extra safety.
 
 ## Tools
 

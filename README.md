@@ -76,7 +76,7 @@ You need to register and confirm your email. Tokens should look like:
 hdn_...
 ```
 
-You can use the token in either of two ways:
+You can use the token in any of these ways:
 
 1. Save it before starting Codex:
 
@@ -85,6 +85,8 @@ export HDNAVIGATOR_MCP_TOKEN="hdn_your_token_here"
 ```
 
 2. Or send it in chat when Codex asks for it.
+
+3. Or send it in chat once: Codex saves it into the global environment variable `HDNAVIGATOR_MCP_TOKEN` (`setx` on Windows, `export` in your shell profile on macOS/Linux), so you never have to send the token again.
 
 If you send the token in chat, Codex should not repeat it back to you. You can rotate the token later on HDnavigator if needed.
 
@@ -249,7 +251,7 @@ https://hdnavigator.ru
 hdn_...
 ```
 
-Токен можно использовать двумя способами:
+Токен можно использовать тремя способами:
 
 1. Сохранить перед запуском Codex:
 
@@ -258,6 +260,8 @@ export HDNAVIGATOR_MCP_TOKEN="hdn_your_token_here"
 ```
 
 2. Или отправить прямо в чат, когда Codex попросит токен.
+
+3. Или отправить в чат один раз: Codex сам сохранит токен в глобальную переменную окружения `HDNAVIGATOR_MCP_TOKEN` (`setx` на Windows, `export` в профиле оболочки на macOS/Linux), и больше присылать его не придётся.
 
 Если токен отправлен в чат, Codex не должен повторять его обратно пользователю. При необходимости токен можно позже перевыпустить на HDnavigator.
 
