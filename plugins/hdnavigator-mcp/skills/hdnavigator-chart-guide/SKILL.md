@@ -5,38 +5,65 @@ description: Use when a user wants to create, retrieve, list, compare, or discus
 
 # HDnavigator Chart Guide
 
-Use the HDnavigator MCP tools whenever the user asks for a Human Design chart, bodygraph, saved calculation, or interpretation based on HDnavigator data.
+Use the HDnavigator MCP tools whenever the user asks for a Human Design chart, bodygraph, saved
+calculation, or interpretation based on HDnavigator data.
 
 ## Authentication
 
-HDnavigator MCP can create a Human Design bodygraph and brief explanation for any complete birth date, but each tool call needs an HDnavigator token.
+The MCP server accepts three authentication methods. Choose the first that is available and do not
+ask the user for a token if one is already configured.
 
-Before asking the user for a token, check the environment variable `HDNAVIGATOR_MCP_TOKEN`. If it is set, read it and use it as the `token` argument for every tool call. Do not ask the user for a token again.
+### 1. OAuth (preferred)
 
-When the user has installed the plugin but no token is saved yet, explain this setup flow:
+If the harness supports MCP OAuth, ask it to sign in (`codex mcp login hdnavigator` or
+`opencode mcp auth hdnavigator`) and call the tools without any token. The client keeps the access
+token in the Authorization header; the model never sees it.
 
-1. Go to https://hdnavigator.ru.
-2. Register and confirm the email address.
-3. Get an HDnavigator token that starts with `hdn_`.
-4. Ask the user to send the `hdn_...` token in chat. The first time a token arrives in chat, save it into the global environment variable `HDNAVIGATOR_MCP_TOKEN` so all future chats reuse it automatically:
-   - On Windows: `setx HDNAVIGATOR_MCP_TOKEN "hdn_..."` (saves to the user environment; new terminal and chat sessions read it).
-   - On macOS/Linux: append `export HDNAVIGATOR_MCP_TOKEN="hdn_..."` to `~/.zshrc` (or `~/.bashrc`/`~/.profile`).
-   - Confirm the variable was saved, but do not print the token value.
-5. After that, HDnavigator can create a bodygraph with a short description for any birth date.
+If the harness opens an embedded browser without an active HDnavigator session, tell the user to open
+the printed authorization URL in **their own browser**, where they are logged in to
+`https://hdnavigator.ru`, and approve there. The loopback callback still works. If a finished
+callback URL is printed, paste it into the sign-in prompt.
 
-A newly saved variable is only read by new sessions. If `setx` or the profile edit was just applied and the current session still does not see the variable, keep using the token the user sent in chat for this session.
+### 2. Token from the environment
 
-Never repeat the token back to the user, never include it in final answers, and never write it into project files, logs, or commits. The token lives only in the environment variable. If the user pasted a token into chat, you may mention that they can rotate it later in their HDnavigator account for extra safety.
+Check `HDNAVIGATOR_MCP_TOKEN` first. If it is set, the client sends it in the Authorization header,
+so call the tools **without** the `token` argument. Do not ask the user again.
+
+If the user pasted an `hdn_...` token in chat and it is not saved yet, run the one-time setup command
+from the website (or the equivalent for this harness) so future sessions do not need the token:
+
+- Codex: add `[mcp_servers.hdnavigator]` with `url = "https://mcp.slavayank.com/mcp"` and
+  `bearer_token_env_var = "HDNAVIGATOR_MCP_TOKEN"` to `~/.codex/config.toml`;
+- save it into the `HDNAVIGATOR_MCP_TOKEN` environment variable:
+- Windows: `setx HDNAVIGATOR_MCP_TOKEN "hdn_..."`;
+- macOS/Linux: append `export HDNAVIGATOR_MCP_TOKEN="hdn_..."` to `~/.zshrc` (or `~/.bashrc` / `~/.profile`);
+- OpenCode: `opencode mcp add hdnavigator --global --url https://mcp.slavayank.com/mcp --header 'Authorization=Bearer {env:HDNAVIGATOR_MCP_TOKEN}'` and set `oauth: false` in the server config.
+
+Then tell the user to restart the agent: a newly saved variable is only read by new sessions. For the
+current session, use the token they sent in chat as the `token` argument.
+
+### 3. Token argument (fallback)
+
+If no Authorization header is configured, pass the `hdn_...` token as the optional `token` argument.
+This is backward-compatible and works immediately, including the first session when the user just
+pasted the token. After using it, offer to run the setup command from section 2.
+
+Never repeat the token back to the user, never include it in final answers, and never write it into
+project files, logs, or commits. If the user pasted a token into chat, you may mention that they can
+rotate it later in their HDnavigator account.
 
 ## Tools
 
-Use `get_new_chart` to create a new Human Design chart from ordered birth data. Ask for a missing `token` first, then ask for missing birth fields before calling the tool: `year`, `month`, `day`, `hour`, `minute`, `city`, and `country`.
+Use `get_new_chart` to create a new Human Design chart from exact birth data. Ask for missing birth
+fields before calling: `year`, `month`, `day`, `hour`, `minute`, `city`, `country`. Add `token` only
+when using fallback section 3.
 
-Send the token and birth data to `get_new_chart` in English field names. Preserve city and country exactly as the user provided them unless the user corrects the spelling. The upstream service resolves timezone after token verification.
+Send birth data in English field names. Preserve city and country exactly as provided. The upstream
+service resolves timezone after authentication.
 
-Use `list_saved_charts` when the user asks what charts are already saved. It requires `token` and is paginated with `limit` and `offset`. If the result has more records than shown, offer to continue with the next offset. The next offset is `offset + limit`.
-
-Use `get_saved_chart` when the user chooses or mentions a saved chart id. Pass `token` and the numeric `chart_id`.
+Use `list_saved_charts` for the user's library. It is paginated with `limit` and `offset`; the next
+offset is `offset + limit`. Use `get_saved_chart` with a numeric `chart_id` when the user selects a
+saved chart. Both are free; `get_new_chart` consumes balance.
 
 ## Response Style
 
@@ -46,22 +73,13 @@ When a chart response contains `image_url`, show the bodygraph image first:
 ![Human Design bodygraph](https://example.com/images/bodygraphs/1.png)
 ```
 
-Then show the permanent page link from `page_url` when present.
-
-Summarize the main parameters in a human-readable order: type, strategy, authority, profile, definition, centers, gates, channels, incarnation cross, variables, and any descriptions supplied by HDnavigator.
-
-Treat descriptions returned by HDnavigator as authoritative. Do not invent missing Human Design descriptions. If the response is in English and the user is speaking another language, translate and explain it in the user's language.
-
-Do not dump raw JSON unless the user explicitly asks for raw data. Do not infer meaning from bodygraph pixels; rely on the structured response fields.
+Then show `page_url`, summarize type, strategy, authority, profile, definition, centers, gates,
+channels, incarnation cross and variables. Treat returned descriptions as authoritative; translate
+them into the user's language without changing meaning. Do not dump raw JSON unless explicitly asked.
 
 ## Errors
 
-If the MCP reports `401` or `403`, tell the user that the token was rejected or lacks access.
-
-If the MCP reports `402`, explain that HDnavigator says payment or balance is required. If a top-up link is returned, include it.
-
-If the MCP reports `404`, say that the saved chart was not found or is unavailable for this account.
-
-If the MCP reports `422`, ask the user to correct the birth data or chart id.
-
-If the MCP reports `429`, say that the request limit was reached and suggest trying again later. Do not describe `429` as an empty balance condition; balance/payment is `402`.
+- `401`/`403` — token rejected; if using fallback, offer to configure the Authorization header;
+- `402` — insufficient balance; include the top-up link if returned;
+- `404` — chart not found or not owned; `422` — correct birth data or chart id;
+- `429` — rate limit; suggest retrying later. It never means insufficient balance.

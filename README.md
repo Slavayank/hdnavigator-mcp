@@ -1,4 +1,4 @@
-# HDnavigator MCP for Codex
+# HDnavigator MCP for Codex / OpenCode
 
 <p align="center">
   <a href="#english"><img alt="In English" src="https://img.shields.io/badge/In%20English-111827?style=for-the-badge"></a>
@@ -7,340 +7,258 @@
 
 <a id="english"></a>
 
-HDnavigator MCP connects Codex to the HDnavigator Human Design service.
+HDnavigator MCP connects an AI agent to the HDnavigator Human Design service.
 
-With this plugin, Codex can:
+With these tools the agent can:
 
-- create and save a new Human Design bodygraph from exact birth data;
-- show the bodygraph image first when `image_url` is returned;
-- list saved charts from the user's HDnavigator account;
-- open one saved chart by `chart_id`;
-- explain chart parameters, gates, channels, centers, profile, type, authority, and returned descriptions in the user's language.
+- create and save a bodygraph from exact birth data;
+- show `image_url` first, then `page_url` and structured facts;
+- list saved charts and open one by `chart_id`;
+- explain type, authority, profile, centers, gates, channels, variables and descriptions in the user's language.
 
-The hosted MCP server is:
+- Hosted MCP endpoint: `https://mcp.slavayank.com/mcp`
+- Website (token, balance, usage): `https://hdnavigator.ru`
+- Source: `https://github.com/Slavayank/hdnavigator-mcp`
 
-```text
-https://mcp.slavayank.com/mcp
-```
-
-The HDnavigator website is:
-
-```text
-https://hdnavigator.ru
-```
-
-## Install
-
-In AI Harness / Codex plugin installation flow, install this GitHub repository:
+## Install the plugin
 
 ```bash
 npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --global
 ```
 
-If you want to install it only for the current project instead of globally:
+Or project-only:
 
 ```bash
 npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --project
 ```
 
-If your Codex environment uses the Codex CLI plugin commands directly, use:
+With Codex CLI plugin commands directly:
 
 ```bash
 codex plugin marketplace add Slavayank/hdnavigator-mcp
 codex plugin add hdnavigator-mcp@hdnavigator
 ```
 
-After installation, restart Codex or open a new task so the MCP tools can load.
+After installation restart Codex (or open a new task) so the tools and the skill load.
 
-## First prompt after installation
+## Authentication: three supported flows
 
-Send this first message to Codex:
+The server uses **dual-mode authentication**. All three flows call the same three tools.
 
-```text
-Create my Human Design chart with HDnavigator.
+### 1. OAuth — recommended, no token in chat
+
+The agent signs in through OAuth 2.1 (PKCE). The access token is kept by the client and sent in the
+`Authorization` header; the model never sees it.
+
+```bash
+# Codex
+codex mcp login hdnavigator
+# OpenCode
+opencode mcp auth hdnavigator
 ```
 
-Codex should then ask for an HDnavigator token and exact birth data.
+The sign-in page opens in a browser. **Important:** if the harness opens its own embedded browser
+with no active HDnavigator session, copy the authorization URL it prints and open it in **your own browser**,
+where you are already logged in to `https://hdnavigator.ru`. Approve access there; the local
+callback listener (`http://127.0.0.1/...`) receives the code even when the page is opened elsewhere.
+If the harness shows a finished callback URL (`http://127.0.0.1:PORT/callback?code=...`), paste it
+into the sign-in prompt.
 
-## Token
+### 2. Static token in `Authorization` — simple, no browser
 
-Get your HDnavigator token at:
+Get a token at `https://hdnavigator.ru`: register, confirm your email and create a token starting with
+`hdn_`. Save it once in the environment variable `HDNAVIGATOR_MCP_TOKEN` and point the MCP client at
+that variable. The agent does not need to know the token value.
 
-```text
-https://hdnavigator.ru
+**Codex** — add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.hdnavigator]
+url = "https://mcp.slavayank.com/mcp"
+bearer_token_env_var = "HDNAVIGATOR_MCP_TOKEN"
 ```
 
-You need to register and confirm your email. Tokens should look like:
+Save the variable (Windows):
 
-```text
-hdn_...
+```powershell
+setx HDNAVIGATOR_MCP_TOKEN "hdn_your_token_here"
 ```
 
-You can use the token in any of these ways:
-
-1. Save it before starting Codex:
+or macOS / Linux (add to `~/.zshrc`, `~/.bashrc` or `~/.profile`):
 
 ```bash
 export HDNAVIGATOR_MCP_TOKEN="hdn_your_token_here"
 ```
 
-2. Or send it in chat when Codex asks for it.
+Restart the agent: a variable set with `setx` or in a shell profile is read by **new** sessions.
 
-3. Or send it in chat once: Codex saves it into the global environment variable `HDNAVIGATOR_MCP_TOKEN` (`setx` on Windows, `export` in your shell profile on macOS/Linux), so you never have to send the token again.
+**OpenCode** — add to `opencode.json` (project or global) or use the CLI:
 
-If you send the token in chat, Codex should not repeat it back to you. You can rotate the token later on HDnavigator if needed.
+```bash
+opencode mcp add hdnavigator --global --url https://mcp.slavayank.com/mcp --header 'Authorization=Bearer {env:HDNAVIGATOR_MCP_TOKEN}'
+```
 
-## Birth data format
-
-For a new chart, Codex needs:
-
-```json
+```jsonc
 {
-  "year": 1990,
-  "month": 5,
-  "day": 21,
-  "hour": 14,
-  "minute": 35,
-  "city": "Omsk",
-  "country": "Russia"
+  "mcp": {
+    "servers": {
+      "hdnavigator": {
+        "type": "remote",
+        "url": "https://mcp.slavayank.com/mcp",
+        "oauth": false,
+        "headers": { "Authorization": "Bearer {env:HDNAVIGATOR_MCP_TOKEN}" }
+      }
+    }
+  }
 }
 ```
 
-Timezone is resolved by HDnavigator after token verification, using the city and country.
+### 3. Token in the chat / tool argument — backward-compatible fallback
 
-## Available tools
+Nothing has to be installed: send the `hdn_...` token to the agent in chat, and the agent passes it as
+the optional `token` argument. This is the legacy path and is kept for old clients. The agent should
+offer to run the one-time setup command from variant 2 so that the next session no longer needs the
+token in chat. Never repeat the token back, and never write it into project files.
 
-The plugin exposes these MCP tools:
+## Ready-made setup command from the website
 
-- `get_new_chart` — creates and saves a new Human Design chart.
-- `list_saved_charts` — lists saved charts with `limit` and `offset` pagination.
-- `get_saved_chart` — loads one saved chart by numeric `chart_id`.
+`https://hdnavigator.ru` → **API / MCP** generates the exact command for your account and harness
+(Codex, OpenCode or a universal prompt) with your token already inserted. Copy it into the agent once;
+the agent runs it, saves `HDNAVIGATOR_MCP_TOKEN` and configures the client. Restart the agent.
 
-Every tool call requires the user's HDnavigator token as the `token` argument.
+## Birth data format
 
-## Expected chart response
-
-HDnavigator may return:
-
-- `image_url` — direct bodygraph image URL;
-- `page_url` — permanent chart page, for example `https://hdnavigator.ru/bodygraph/1`;
-- structured chart facts: type, profile, authority, centers, gates, channels, variables, cross, etc.;
-- descriptions for type, profile, authority, gates, channels, centers, and other parameters.
-
-Codex should show the image first:
-
-```markdown
-![Human Design bodygraph](https://hdnavigator.ru/images/bodygraphs/1.png)
+```json
+{ "year": 1990, "month": 5, "day": 21, "hour": 14, "minute": 35, "city": "Omsk", "country": "Russia" }
 ```
 
-Then Codex should show the permanent page URL, important structured facts, and translated descriptions. Raw JSON should be hidden unless the user explicitly asks for it.
+Timezone is resolved by HDnavigator after authentication, using city and country.
 
-## Example conversation
+## Tools
 
-User:
+| Tool | Arguments | Notes |
+| --- | --- | --- |
+| `get_new_chart` | `year`, `month`, `day`, `hour`, `minute`, `city`, `country`, optional `token` | Creates and saves a chart; charged |
+| `list_saved_charts` | optional `limit`, `offset`, `token` | Free; next offset = `offset + len(charts)` |
+| `get_saved_chart` | `chart_id`, optional `token` | Free; ownership checked by HDnavigator |
 
-```text
-Create my Human Design chart with HDnavigator.
-```
+`token` is optional now: it is only a fallback for clients that cannot send an `Authorization` header.
+Tool calls without either credential return an explicit authentication error.
 
-Codex:
+## Errors
 
-```text
-Please send your HDnavigator token. You can get it at https://hdnavigator.ru after registration and email confirmation.
-```
-
-User:
-
-```text
-hdn_your_token_here
-1990-05-21, 14:35, Omsk, Russia
-```
-
-Codex then calls `get_new_chart` and explains the result.
-
-## Troubleshooting
-
-If Codex only shows the guide but does not see the tools, open a new task after installing the plugin.
-
-If the token is invalid or expired, HDnavigator may return `401`.
-
-If the account balance is not enough, HDnavigator may return `402`.
-
-If too many requests are sent, HDnavigator may return `429`. This means rate limit, not insufficient balance.
-
-If `image_url` is present but the image is not rendered by the client, Codex should still show the direct image link.
+- `401` — token invalid/expired; `403` — access denied; `402` — insufficient balance (top-up link is returned);
+- `404` — chart not found/not owned; `422` — invalid input; `429` — rate limit, not a balance problem.
 
 ---
 
 <a id="russian"></a>
 
-# HDnavigator MCP для Codex
+# HDnavigator MCP для Codex / OpenCode
 
-HDnavigator MCP подключает Codex к сервису HDnavigator для расчёта Дизайна Человека.
+Плагин подключает агента к сервису HDnavigator (Design Человека): создать бодиграф, показать картинку
+и ссылку, список сохранённых расчётов и объяснение параметров на языке пользователя.
 
-С этим плагином Codex может:
+- MCP-сервер: `https://mcp.slavayank.com/mcp`
+- Сайт (токен, баланс, статистика): `https://hdnavigator.ru`
+- Репозиторий: `https://github.com/Slavayank/hdnavigator-mcp`
 
-- создать и сохранить новый бодиграф по точным данным рождения;
-- показать изображение бодиграфа первым, если в ответе есть `image_url`;
-- показать список сохранённых расчётов пользователя;
-- открыть один сохранённый расчёт по `chart_id`;
-- объяснить тип, профиль, авторитет, центры, ворота, каналы, переменные и описания на языке пользователя.
-
-Адрес MCP-сервера:
-
-```text
-https://mcp.slavayank.com/mcp
-```
-
-Сайт HDnavigator:
-
-```text
-https://hdnavigator.ru
-```
-
-## Установка
-
-В AI Harness / установщике плагинов Codex установите этот GitHub-репозиторий:
+## Установка плагина
 
 ```bash
 npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --global
 ```
 
-Если нужно установить только для текущего проекта:
-
-```bash
-npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --project
-```
-
-Если в вашей среде Codex используются прямые команды Codex CLI:
+Для текущего проекта: `npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --project`.
+Через CLI Codex:
 
 ```bash
 codex plugin marketplace add Slavayank/hdnavigator-mcp
 codex plugin add hdnavigator-mcp@hdnavigator
 ```
 
-После установки перезапустите Codex или откройте новый task, чтобы MCP-инструменты загрузились.
+После установки перезапустите Codex или откройте новую задачу.
 
-## Первый запрос после установки
+## Аутентификация: три варианта
 
-Отправьте Codex первый запрос:
+Сервер работает в **dual-mode**: все три варианта вызывают одни и те же инструменты.
 
-```text
-Create my Human Design chart with HDnavigator.
-```
+### 1. OAuth — рекомендуется, токен не попадает в чат
 
-Можно по-русски:
-
-```text
-Создай мой бодиграф через HDnavigator.
-```
-
-После этого Codex должен попросить HDnavigator token и точные данные рождения.
-
-## Токен
-
-Получите HDnavigator token на сайте:
-
-```text
-https://hdnavigator.ru
-```
-
-Для этого нужно зарегистрироваться и подтвердить email. Токен должен выглядеть примерно так:
-
-```text
-hdn_...
-```
-
-Токен можно использовать тремя способами:
-
-1. Сохранить перед запуском Codex:
+Агент входит через OAuth 2.1 (PKCE). Access-токен хранит клиент и отправляет его в заголовке
+`Authorization`; модель его не видит.
 
 ```bash
-export HDNAVIGATOR_MCP_TOKEN="hdn_your_token_here"
+# Codex
+codex mcp login hdnavigator
+# OpenCode
+opencode mcp auth hdnavigator
 ```
 
-2. Или отправить прямо в чат, когда Codex попросит токен.
+**Важно:** если харнес открывает свой внутренний браузер без активной сессии HDnavigator, скопируйте
+выведенный URL авторизации и откройте его в том браузере, где вы уже вошли на `https://hdnavigator.ru`.
+Подтвердите доступ там — локальный слушатель (`http://127.0.0.1/...`) получит код, даже если страницу
+открыли в другом браузере. Если харнес показывает готовый callback-URL, вставьте его в приглашение входа.
 
-3. Или отправить в чат один раз: Codex сам сохранит токен в глобальную переменную окружения `HDNAVIGATOR_MCP_TOKEN` (`setx` на Windows, `export` в профиле оболочки на macOS/Linux), и больше присылать его не придётся.
+### 2. Статический токен в `Authorization` — без браузера
 
-Если токен отправлен в чат, Codex не должен повторять его обратно пользователю. При необходимости токен можно позже перевыпустить на HDnavigator.
+Получите токен на `https://hdnavigator.ru`: зарегистрируйтесь, подтвердите email, создайте токен `hdn_`.
+Один раз сохраните его в переменную `HDNAVIGATOR_MCP_TOKEN` и укажите её клиенту. Агенту значение токена
+не нужно.
+
+**Codex** — в `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.hdnavigator]
+url = "https://mcp.slavayank.com/mcp"
+bearer_token_env_var = "HDNAVIGATOR_MCP_TOKEN"
+```
+
+Windows: `setx HDNAVIGATOR_MCP_TOKEN "hdn_your_token_here"`;
+macOS/Linux: `export HDNAVIGATOR_MCP_TOKEN="hdn_your_token_here"` в `~/.zshrc` / `~/.bashrc` / `~/.profile`.
+Перезапустите агента: переменная читается только новыми сессиями.
+
+**OpenCode**:
+
+```bash
+opencode mcp add hdnavigator --global --url https://mcp.slavayank.com/mcp --header 'Authorization=Bearer {env:HDNAVIGATOR_MCP_TOKEN}'
+```
+
+или в `opencode.json`: `{"mcp":{"servers":{"hdnavigator":{"type":"remote","url":"https://mcp.slavayank.com/mcp","oauth":false,"headers":{"Authorization":"Bearer {env:HDNAVIGATOR_MCP_TOKEN}"}}}}}`.
+
+### 3. Токен в чате / аргументе — обратная совместимость
+
+Ничего устанавливать не нужно: пришлите `hdn_...` агенту в чат, он передаст его необязательным
+аргументом `token`. Это старый путь, он сохранён для прежних клиентов. Агент должен предложить выполнить
+команду настройки из варианта 2, чтобы в следующей сессии токен больше не нужен был в чате. Никогда не
+повторяйте токен и не записывайте его в файлы проекта.
+
+## Готовая команда на сайте
+
+На `https://hdnavigator.ru` → **API / MCP** для вашего аккаунта генерируется точная команда под ваш
+харнес (Codex, OpenCode или универсальный промпт) с уже вставленным токеном. Скопируйте её агенту один
+раз; агент сохранит `HDNAVIGATOR_MCP_TOKEN`, настроит клиент и перезапустится.
 
 ## Формат данных рождения
 
-Для нового расчёта Codex должен получить:
-
 ```json
-{
-  "year": 1990,
-  "month": 5,
-  "day": 21,
-  "hour": 14,
-  "minute": 35,
-  "city": "Omsk",
-  "country": "Russia"
-}
+{ "year": 1990, "month": 5, "day": 21, "hour": 14, "minute": 35, "city": "Omsk", "country": "Russia" }
 ```
 
-Timezone определяется на стороне HDnavigator после проверки токена, по городу и стране.
+Часовой пояс определяет HDnavigator после аутентификации по городу и стране.
 
-## Доступные инструменты
+## Инструменты
 
-Плагин подключает MCP-инструменты:
+| Инструмент | Аргументы | Особенность |
+| --- | --- | --- |
+| `get_new_chart` | `year`, `month`, `day`, `hour`, `minute`, `city`, `country`, опционально `token` | Создаёт и сохраняет карту, платно |
+| `list_saved_charts` | опционально `limit`, `offset`, `token` | Бесплатно; следующий offset = `offset + len(charts)` |
+| `get_saved_chart` | `chart_id`, опционально `token` | Бесплатно; владельца проверяет HDnavigator |
 
-- `get_new_chart` — создать и сохранить новый бодиграф.
-- `list_saved_charts` — получить список сохранённых расчётов с пагинацией `limit` и `offset`.
-- `get_saved_chart` — получить один сохранённый расчёт по числовому `chart_id`.
+`token` теперь необязателен — это только fallback для клиентов, которые не умеют слать `Authorization`.
+Вызов без токена и без заголовка возвращает явную ошибку аутентификации.
 
-Каждый вызов инструмента требует HDnavigator token в аргументе `token`.
+## Ошибки
 
-## Ожидаемый ответ расчёта
-
-HDnavigator может вернуть:
-
-- `image_url` — прямую ссылку на изображение бодиграфа;
-- `page_url` — постоянную ссылку на страницу расчёта, например `https://hdnavigator.ru/bodygraph/1`;
-- структурированные параметры: тип, профиль, авторитет, центры, ворота, каналы, переменные, крест и т.д.;
-- описания типа, профиля, авторитета, ворот, каналов, центров и других параметров.
-
-Codex должен показать изображение первым:
-
-```markdown
-![Human Design bodygraph](https://hdnavigator.ru/images/bodygraphs/1.png)
-```
-
-Затем Codex должен показать постоянную ссылку, ключевые параметры и переведённые описания. Сырой JSON не нужно показывать, если пользователь явно не попросил.
-
-## Пример диалога
-
-Пользователь:
-
-```text
-Создай мой бодиграф через HDnavigator.
-```
-
-Codex:
-
-```text
-Для расчёта нужен HDnavigator token. Получите его на https://hdnavigator.ru после регистрации и подтверждения email.
-```
-
-Пользователь:
-
-```text
-hdn_your_token_here
-1990-05-21, 14:35, Omsk, Russia
-```
-
-После этого Codex вызывает `get_new_chart` и объясняет результат.
-
-## Частые проблемы
-
-Если Codex видит только инструкцию, но не видит инструменты, откройте новый task после установки плагина.
-
-Если токен неверный или истёк, HDnavigator может вернуть `401`.
-
-Если на балансе недостаточно средств, HDnavigator может вернуть `402`.
-
-Если отправлено слишком много запросов, HDnavigator может вернуть `429`. Это rate limit, а не нехватка баланса.
-
-Если есть `image_url`, но клиент Codex не отрисовал картинку, Codex должен показать прямую ссылку на изображение.
+- `401` — токен неверен/истёк; `403` — нет доступа; `402` — недостаточно баланса (возвращается ссылка);
+- `404` — карта не найдена или не принадлежит аккаунту; `422` — неверные данные; `429` — лимит запросов, не баланс.

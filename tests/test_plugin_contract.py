@@ -50,20 +50,35 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
             "translate",
             "setx",
             "environment variable",
+            "OAuth",
+            "codex mcp login",
+            "opencode mcp auth",
+            "own browser",
+            "Authorization",
         ]:
             self.assertIn(expected, skill)
 
         self.assertIn("Never repeat the token", skill)
 
-    def test_readme_explains_easy_token_setup(self):
+    def test_readme_explains_all_three_authentication_flows(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
         self.assertIn("hdn_", readme)
-        self.assertIn("send it in chat", readme)
         self.assertIn("HDNAVIGATOR_MCP_TOKEN", readme)
         self.assertIn("https://hdnavigator.ru", readme)
-        self.assertIn("once", readme)
         self.assertIn("setx", readme)
+        self.assertIn("codex mcp login", readme)
+        self.assertIn("opencode mcp auth", readme)
+        self.assertIn("own browser", readme)
+        self.assertIn("Authorization", readme)
+        self.assertIn("dual-mode", readme)
+
+    def test_readme_has_codex_and_opencode_setup_examples(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("bearer_token_env_var", readme)
+        self.assertIn("opencode mcp add hdnavigator", readme)
+        self.assertIn("{env:HDNAVIGATOR_MCP_TOKEN}", readme)
 
     def test_marketplace_entry_is_installable_on_install(self):
         marketplace = self.load_json(ROOT / ".agents" / "plugins" / "marketplace.json")
