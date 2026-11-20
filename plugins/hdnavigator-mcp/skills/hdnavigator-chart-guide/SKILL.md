@@ -8,6 +8,23 @@ description: Use when a user wants to create, retrieve, list, compare, or discus
 Use the HDnavigator MCP tools whenever the user asks for a Human Design chart, bodygraph, saved
 calculation, or interpretation based on HDnavigator data.
 
+## After installation
+
+When the plugin has just been installed (or the user asks how to start), say this once, in the user's
+language:
+
+> HDnavigator MCP is installed. Restart your agent so the tools load, then choose one way to sign in:
+> **1. OAuth (recommended)** — use your harness's MCP sign-in: Codex `codex mcp login hdnavigator`,
+> OpenCode `/mcps` → hdnavigator → sign in. If your agent opens an embedded browser without your
+> HDnavigator session, copy the printed URL and open it in your own browser where you are logged in
+> to https://hdnavigator.ru, and approve there.
+> **2. Token** — get an `hdn_...` token at https://hdnavigator.ru (register and confirm your email)
+> and paste it here once. I will save it in the environment and configure the connection.
+> After that, say "Create my Human Design chart" or "Show my saved charts".
+
+Do not ask for a token if OAuth sign-in is available and succeeds. Never repeat a token back to the
+user. This greeting is about setup only — do not call any chart tool until the user asks for a chart.
+
 ## Authentication
 
 The MCP server is `https://mcp.slavayank.com/mcp` for every harness. The `codex ...` and

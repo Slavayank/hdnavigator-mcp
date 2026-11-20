@@ -35,6 +35,10 @@ anything into OpenCode, Claude Code, Cursor or any other harness.
 If the client opens an embedded browser without your HDnavigator session, copy the printed
 authorization URL and open it in your own browser, where you are logged in to `https://hdnavigator.ru`.
 
+After installation the agent should greet the user once: restart the harness, then sign in via OAuth
+(recommended) or paste an `hdn_...` token from `https://hdnavigator.ru`; the agent must never repeat
+the token back. See `skills/hdnavigator-chart-guide/SKILL.md` → "After installation".
+
 ## Install the plugin (Codex only)
 
 ```bash
@@ -190,6 +194,8 @@ MCP-сервер один для всех клиентов: `https://mcp.slavaya
 | **Любой другой MCP-клиент** | Добавьте удалённый сервер Streamable HTTP с URL `https://mcp.slavayank.com/mcp` и войдите через OAuth средствами клиента. Если OAuth нет — укажите `Authorization: Bearer <hdn_ токен>` в настройках заголовков. |
 
 Если клиент открывает внутренний браузер без вашей сессии, скопируйте показанный URL авторизации и откройте его в своём браузере, где вы вошли на `https://hdnavigator.ru`.
+
+После установки агент должен один раз поприветствовать пользователя: перезапустить харнес, затем войти через OAuth (рекомендуется) или прислать токен `hdn_...` с `https://hdnavigator.ru`; агент никогда не повторяет токен вслух. См. `skills/hdnavigator-chart-guide/SKILL.md` → «After installation».
 
 ## Установка плагина (только Codex)
 
