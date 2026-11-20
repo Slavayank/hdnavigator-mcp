@@ -1,7 +1,12 @@
 {
   "mcpServers": {
     "hdnavigator": {
-      "url": "https://mcp.slavayank.com/mcp"
+      "type": "http",
+      "url": "https://mcp.slavayank.com/mcp",
+      "oauth": {
+        "clientId": "hdnavigator-mcp",
+        "callbackUrl": "http://127.0.0.1/callback"
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "hdnavigator-mcp",
-  "version": "0.2.0+dualmode.20261120",
+  "version": "0.3.0+oauth.20261120",
   "description": "Create, view, and explain Human Design charts with HDnavigator.",
   "author": {
     "name": "HDnavigator",

@@ -22,12 +22,15 @@ class HDnavigatorPluginContractTests(unittest.TestCase):
         self.assertEqual(manifest["interface"]["logo"], "./assets/logo.svg")
         self.assertEqual(manifest["interface"]["composerIcon"], "./assets/logo.svg")
 
-    def test_mcp_configuration_uses_public_server_without_discovery_auth(self):
+    def test_mcp_configuration_uses_public_server_with_pre_registered_oauth(self):
         config = self.load_json(PLUGIN / ".mcp.json")
         server = config["mcpServers"]["hdnavigator"]
 
-        self.assertEqual(set(server), {"url"})
+        self.assertEqual(set(server), {"type", "url", "oauth"})
+        self.assertEqual(server["type"], "http")
         self.assertEqual(server["url"], "https://mcp.slavayank.com/mcp")
+        self.assertEqual(server["oauth"]["clientId"], "hdnavigator-mcp")
+        self.assertEqual(server["oauth"]["callbackUrl"], "http://127.0.0.1/callback")
 
     def test_skill_instructions_cover_required_workflows(self):
         skill = (PLUGIN / "skills" / "hdnavigator-chart-guide" / "SKILL.md").read_text(
