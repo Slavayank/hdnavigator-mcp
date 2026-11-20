@@ -8,28 +8,44 @@ description: Use when a user wants to create, retrieve, list, compare, or discus
 Use the HDnavigator MCP tools whenever the user asks for a Human Design chart, bodygraph, saved
 calculation, or interpretation based on HDnavigator data.
 
-## After installation
+## After installation — automatic OAuth
 
-When the plugin has just been installed (or the user asks how to start), say this once, in the user's
-language:
+When the MCP server has just been connected (or the user asks how to start), do **not** give a lecture
+about menus and do **not** ask for a token yet:
 
-> HDnavigator MCP is installed. Restart your agent so the tools load, then choose one way to sign in:
-> **1. OAuth (recommended)** — use your harness's MCP sign-in: Codex `codex mcp login hdnavigator`,
-> OpenCode `/mcps` → hdnavigator → sign in. If your agent opens an embedded browser without your
-> HDnavigator session, copy the printed URL and open it in your own browser where you are logged in
-> to https://hdnavigator.ru, and approve there.
-> **2. Token** — get an `hdn_...` token at https://hdnavigator.ru (register and confirm your email)
-> and paste it here once. I will save it in the environment and configure the connection.
-> After that, say "Create my Human Design chart" or "Show my saved charts".
+1. Immediately call `list_saved_charts` with no `token` argument.
+2. The unauthenticated call returns an OAuth `authorization_required` challenge. The client starts its
+   native sign-in and prints an authorization URL (a long `https://hdnavigator.ru/oauth/authorize?...`
+   link with `code_challenge`, `state` and a loopback `redirect_uri`).
+3. **Copy that URL verbatim into a code block and show it to the user.** Say only: "Open this link in
+   your own browser on this computer, log in to HDnavigator if needed, and click the green **Allow**
+   button. The local callback will receive the code automatically."
+4. Then wait for the user to confirm. Never expose the URL's query parameters in prose, never invent
+   or shorten it.
 
-Then **immediately call `list_saved_charts` with no `token` argument**. An unauthenticated tool call
-returns an OAuth `authorization_required` challenge, and compliant clients start their native sign-in
-flow from it. Tell the user only: "The sign-in window should open now — please confirm access in your
-browser." Then wait for the user. Do **not** send them to `/mcps`, settings menus or CLI commands —
-that is a fallback only if the client fails to react to the challenge.
+If the client does not print a URL, start its sign-in command yourself and relay the printed URL the
+same way: `codex mcp login hdnavigator` (Codex) or `opencode mcp auth hdnavigator` (OpenCode; if the
+CLI is missing, `npx -y @opencode/cli mcp auth hdnavigator`). Do **not** tell the user to use `/mcps`
+or settings menus — that is not needed and was removed from the docs.
 
-Do not ask for a token if OAuth sign-in is available and succeeds. Never repeat a token back to the
-user.
+Never ask for a token if OAuth succeeds. Never repeat a token back to the user.
+
+## Fallback — user pastes a token in chat
+
+If the user prefers the simplest path or the client cannot do MCP OAuth:
+
+1. The user gets an `hdn_...` token at `https://hdnavigator.ru` (register + confirm email) and pastes
+   it into the chat.
+2. Use it as the optional `token` argument for the current session so it works immediately.
+3. Also run the harness-specific setup so future sessions do not need it:
+   - Codex: add `[mcp_servers.hdnavigator]` with `url = "https://mcp.slavayank.com/mcp"` and
+     `bearer_token_env_var = "HDNAVIGATOR_MCP_TOKEN"` to `~/.codex/config.toml`, then `setx
+     HDNAVIGATOR_MCP_TOKEN "hdn_..."` (Windows) or `export ...` in the shell profile (macOS/Linux);
+   - OpenCode: add `"oauth": false` and `"headers": { "Authorization": "Bearer <token>" }` to the
+     `hdnavigator` server in `opencode.json`, or run `opencode mcp add hdnavigator --global --url
+     https://mcp.slavayank.com/mcp --header 'Authorization=Bearer {env:HDNAVIGATOR_MCP_TOKEN}'`;
+   - any other client: put `Authorization: Bearer <token>` into its header settings.
+4. Tell the user to restart the agent once. Never print or echo the token.
 
 ## Authentication
 

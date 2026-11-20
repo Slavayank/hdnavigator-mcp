@@ -1,4 +1,4 @@
-# HDnavigator MCP for Codex / OpenCode
+# HDnavigator MCP — for any AI harness
 
 <p align="center">
   <a href="#english"><img alt="In English" src="https://img.shields.io/badge/In%20English-111827?style=for-the-badge"></a>
@@ -20,45 +20,48 @@ With these tools the agent can:
 - Website (token, balance, usage): `https://hdnavigator.ru`
 - Source: `https://github.com/Slavayank/hdnavigator-mcp`
 
-## Choose your harness
+## Quick start — choose your harness
 
-The MCP server is the same for every client: `https://mcp.slavayank.com/mcp`.
+Repository (works for every harness): **https://github.com/Slavayank/hdnavigator-mcp**
+Hosted MCP server: **`https://mcp.slavayank.com/mcp`**
+
 **Commands starting with `codex` or `npx codex-marketplace` only affect Codex.** They do not install
 anything into OpenCode, Claude Code, Cursor or any other harness.
 
-| Harness | Setup |
+| Harness | Universal command |
 | --- | --- |
-| **Codex** | Install the plugin below, restart Codex, then `codex mcp login hdnavigator`. |
-| **OpenCode** | `opencode mcp add hdnavigator --url https://mcp.slavayank.com/mcp`. No menu needed: the agent's first tool call returns an OAuth challenge and the client starts sign-in automatically. |
-| **Any other MCP client** | Add a remote / Streamable HTTP server with URL `https://mcp.slavayank.com/mcp` and use the client's own OAuth sign-in. If the client cannot do MCP OAuth, put `Authorization: Bearer <hdn_ token>` into its header setting. |
+| **Codex** | `npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --global` (or `--plugins --project`) |
+| **OpenCode** | `opencode mcp add hdnavigator --url https://mcp.slavayank.com/mcp` — if the CLI is not installed: `npx -y @opencode/cli mcp add hdnavigator --url https://mcp.slavayank.com/mcp` |
+| **Any other MCP client** | Add a remote / Streamable HTTP server with URL `https://mcp.slavayank.com/mcp` |
 
-If the client opens an embedded browser without your HDnavigator session, copy the printed
-authorization URL and open it in your own browser, where you are logged in to `https://hdnavigator.ru`.
+For a client configured by hand:
 
-After installation the agent should greet the user once: restart the harness, then sign in via OAuth
-(recommended) or paste an `hdn_...` token from `https://hdnavigator.ru`; the agent must never repeat
-the token back. See `skills/hdnavigator-chart-guide/SKILL.md` → "After installation".
-
-## Install the plugin (Codex only)
-
-```bash
-npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --global
+```json
+{
+  "mcpServers": {
+    "hdnavigator": { "url": "https://mcp.slavayank.com/mcp" }
+  }
+}
 ```
 
-Or project-only:
+## What happens after installation
 
-```bash
-npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --project
-```
+The agent immediately makes a harmless tool call (`list_saved_charts`). The server answers with an
+OAuth challenge (`401` + `WWW-Authenticate`), and the client starts sign-in **by itself** and prints an
+authorization URL. The agent must copy that URL verbatim and give it to you. Open it in **your own
+browser** on the same computer (an embedded browser may not have your HDnavigator session), log in if
+asked, and click the green **Allow / Разрешить** button. The local callback receives the code and the
+connection is ready — no menus and no token pasting.
 
-With Codex CLI plugin commands directly:
+If the client does not print a URL, run its sign-in command and pass the printed URL the same way:
+`codex mcp login hdnavigator` (Codex) or `opencode mcp auth hdnavigator` (OpenCode).
 
-```bash
-codex plugin marketplace add Slavayank/hdnavigator-mcp
-codex plugin add hdnavigator-mcp@hdnavigator
-```
+## Fallback — no OAuth, no browser
 
-After installation restart Codex (or open a new task) so the tools and the skill load.
+For users who prefer the simplest path: get an `hdn_...` token at `https://hdnavigator.ru`
+(register + confirm email), paste it into the chat once, and the agent saves it into the client
+config automatically (Codex: `bearer_token_env_var`; OpenCode: `Authorization` header) and restarts
+the connection. The token is never repeated back. See `skills/hdnavigator-chart-guide/SKILL.md`.
 
 ## Authentication: three supported flows
 
@@ -182,36 +185,38 @@ Tool calls without either credential return an explicit authentication error.
 - Сайт (токен, баланс, статистика): `https://hdnavigator.ru`
 - Репозиторий: `https://github.com/Slavayank/hdnavigator-mcp`
 
-## Выберите свой харнес
+## Быстрый старт — выберите харнес
 
-MCP-сервер один для всех клиентов: `https://mcp.slavayank.com/mcp`.
-**Команды, начинающиеся с `codex` или `npx codex-marketplace`, действуют только на Codex.** Они ничего не устанавливают в OpenCode, Claude Code, Cursor и другие харнесы.
+Репозиторий (подходит для любого харнеса): **https://github.com/Slavayank/hdnavigator-mcp**
+MCP-сервер: **`https://mcp.slavayank.com/mcp`**
 
-| Харнес | Что делать |
+**Команды, начинающиеся с `codex` или `npx codex-marketplace`, действуют только на Codex.** В OpenCode, Claude Code, Cursor и другие харнесы они ничего не устанавливают.
+
+| Харнес | Универсальная команда |
 | --- | --- |
-| **Codex** | Установите плагин ниже, перезапустите Codex, затем `codex mcp login hdnavigator`. |
-| **OpenCode** | `opencode mcp add hdnavigator --url https://mcp.slavayank.com/mcp`. Меню не нужно: первый вызов инструмента вернёт OAuth-челлендж, и клиент сам начнёт вход. |
-| **Любой другой MCP-клиент** | Добавьте удалённый сервер Streamable HTTP с URL `https://mcp.slavayank.com/mcp` и войдите через OAuth средствами клиента. Если OAuth нет — укажите `Authorization: Bearer <hdn_ токен>` в настройках заголовков. |
+| **Codex** | `npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --global` (или `--plugins --project`) |
+| **OpenCode** | `opencode mcp add hdnavigator --url https://mcp.slavayank.com/mcp` — если CLI не установлен: `npx -y @opencode/cli mcp add hdnavigator --url https://mcp.slavayank.com/mcp` |
+| **Любой другой MCP-клиент** | Добавьте удалённый сервер Streamable HTTP с URL `https://mcp.slavayank.com/mcp` |
 
-Если клиент открывает внутренний браузер без вашей сессии, скопируйте показанный URL авторизации и откройте его в своём браузере, где вы вошли на `https://hdnavigator.ru`.
+Если клиент настраивается вручную:
 
-После установки агент должен один раз поприветствовать пользователя: перезапустить харнес, затем войти через OAuth (рекомендуется) или прислать токен `hdn_...` с `https://hdnavigator.ru`; агент никогда не повторяет токен вслух. См. `skills/hdnavigator-chart-guide/SKILL.md` → «After installation».
-
-## Установка плагина (только Codex)
-
-```bash
-npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --global
+```json
+{
+  "mcpServers": {
+    "hdnavigator": { "url": "https://mcp.slavayank.com/mcp" }
+  }
+}
 ```
 
-Для текущего проекта: `npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --project`.
-Через CLI Codex:
+## Что происходит после установки
 
-```bash
-codex plugin marketplace add Slavayank/hdnavigator-mcp
-codex plugin add hdnavigator-mcp@hdnavigator
-```
+Агент сразу делает безобидный вызов (`list_saved_charts`). Сервер отвечает OAuth-челленджем (`401` + `WWW-Authenticate`), клиент **сам** начинает вход и печатает URL авторизации. Агент обязан скопировать этот URL дословно и дать его вам. Откройте его **в своём браузере на этом же компьютере** (внутренний браузер может быть без вашей сессии), при необходимости войдите и нажмите зелёную кнопку **«Разрешить»**. Локальный callback получит код — подключение готово, без меню и без вставки токена.
 
-После установки перезапустите Codex или откройте новую задачу.
+Если клиент не показал URL, выполните его команду входа и передайте показанный URL так же: `codex mcp login hdnavigator` (Codex) или `opencode mcp auth hdnavigator` (OpenCode).
+
+## Запасной вариант — без OAuth и без браузера
+
+Самый простой путь: получите токен `hdn_...` на `https://hdnavigator.ru` (регистрация + подтверждение email), пришлите его один раз в чат — агент сам сохранит его в конфиг клиента (Codex: `bearer_token_env_var`; OpenCode: заголовок `Authorization`) и переподключит сервер. Токен никогда не повторяется вслух. См. `skills/hdnavigator-chart-guide/SKILL.md`.
 
 ## Аутентификация: три варианта
 
