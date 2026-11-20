@@ -22,8 +22,14 @@ language:
 > and paste it here once. I will save it in the environment and configure the connection.
 > After that, say "Create my Human Design chart" or "Show my saved charts".
 
+Then **immediately call `list_saved_charts` with no `token` argument**. An unauthenticated tool call
+returns an OAuth `authorization_required` challenge, and compliant clients start their native sign-in
+flow from it. Tell the user only: "The sign-in window should open now — please confirm access in your
+browser." Then wait for the user. Do **not** send them to `/mcps`, settings menus or CLI commands —
+that is a fallback only if the client fails to react to the challenge.
+
 Do not ask for a token if OAuth sign-in is available and succeeds. Never repeat a token back to the
-user. This greeting is about setup only — do not call any chart tool until the user asks for a chart.
+user.
 
 ## Authentication
 
