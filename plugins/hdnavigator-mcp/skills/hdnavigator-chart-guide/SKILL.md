@@ -10,8 +10,11 @@ calculation, or interpretation based on HDnavigator data.
 
 ## Authentication
 
-The MCP server accepts three authentication methods. Choose the first that is available and do not
-ask the user for a token if one is already configured.
+The MCP server is `https://mcp.slavayank.com/mcp` for every harness. The `codex ...` and
+`opencode ...` commands below are examples for those two clients only; any other MCP client should
+be configured with the server URL and its own OAuth sign-in (or an Authorization header with an
+`hdn_` token if the client cannot do OAuth). Choose the first available method and do not ask the
+user for a token if one is already configured.
 
 ### 1. OAuth (preferred)
 

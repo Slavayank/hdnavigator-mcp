@@ -20,7 +20,22 @@ With these tools the agent can:
 - Website (token, balance, usage): `https://hdnavigator.ru`
 - Source: `https://github.com/Slavayank/hdnavigator-mcp`
 
-## Install the plugin
+## Choose your harness
+
+The MCP server is the same for every client: `https://mcp.slavayank.com/mcp`.
+**Commands starting with `codex` or `npx codex-marketplace` only affect Codex.** They do not install
+anything into OpenCode, Claude Code, Cursor or any other harness.
+
+| Harness | Setup |
+| --- | --- |
+| **Codex** | Install the plugin below, restart Codex, then `codex mcp login hdnavigator`. |
+| **OpenCode** | `opencode mcp add hdnavigator --url https://mcp.slavayank.com/mcp`, then `/mcps` → sign in (or `opencode mcp auth hdnavigator`). |
+| **Any other MCP client** | Add a remote / Streamable HTTP server with URL `https://mcp.slavayank.com/mcp` and use the client's own OAuth sign-in. If the client cannot do MCP OAuth, put `Authorization: Bearer <hdn_ token>` into its header setting. |
+
+If the client opens an embedded browser without your HDnavigator session, copy the printed
+authorization URL and open it in your own browser, where you are logged in to `https://hdnavigator.ru`.
+
+## Install the plugin (Codex only)
 
 ```bash
 npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --global
@@ -163,7 +178,20 @@ Tool calls without either credential return an explicit authentication error.
 - Сайт (токен, баланс, статистика): `https://hdnavigator.ru`
 - Репозиторий: `https://github.com/Slavayank/hdnavigator-mcp`
 
-## Установка плагина
+## Выберите свой харнес
+
+MCP-сервер один для всех клиентов: `https://mcp.slavayank.com/mcp`.
+**Команды, начинающиеся с `codex` или `npx codex-marketplace`, действуют только на Codex.** Они ничего не устанавливают в OpenCode, Claude Code, Cursor и другие харнесы.
+
+| Харнес | Что делать |
+| --- | --- |
+| **Codex** | Установите плагин ниже, перезапустите Codex, затем `codex mcp login hdnavigator`. |
+| **OpenCode** | `opencode mcp add hdnavigator --url https://mcp.slavayank.com/mcp`, затем `/mcps` → вход (или `opencode mcp auth hdnavigator`). |
+| **Любой другой MCP-клиент** | Добавьте удалённый сервер Streamable HTTP с URL `https://mcp.slavayank.com/mcp` и войдите через OAuth средствами клиента. Если OAuth нет — укажите `Authorization: Bearer <hdn_ токен>` в настройках заголовков. |
+
+Если клиент открывает внутренний браузер без вашей сессии, скопируйте показанный URL авторизации и откройте его в своём браузере, где вы вошли на `https://hdnavigator.ru`.
+
+## Установка плагина (только Codex)
 
 ```bash
 npx codex-marketplace add Slavayank/hdnavigator-mcp --plugins --global
